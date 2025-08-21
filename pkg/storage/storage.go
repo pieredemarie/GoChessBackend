@@ -11,3 +11,8 @@ type Login struct {
 	Email string `json:"email"`
 	Password string `json:"password"`
 }
+
+type AuthStorage interface {
+	Login(email, password string) (string, error)
+	Register(data User) error
+}

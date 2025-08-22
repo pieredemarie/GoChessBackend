@@ -59,13 +59,15 @@ func (b *Board) GetPiece(pos string) *Piece {
 	return b.Squares[row][col]
 }
 
+// for no reason i thought that color means the attacker's color but it's wrong. I hate myself.
+// Here color means the defender's color (the side that owns the square).
 func (b *Board) IsCellAttacked(sussyPos string, color Color) bool { //sussy yeah
 	for row := 0; row < 8; row++ {
 		for col := 0; col < 8; col++ {
 			if b.Squares[row][col] != nil && b.Squares[row][col].Color != color {
 				fig := *b.Squares[row][col]
 
-				fromPos := string(rune('a'+col)) + string(rune('1'+(7-row)))
+				fromPos := string(rune('a'+col)) + string(rune('1'+row))
 				mov := Move{
 					From: fromPos,
 					To:   sussyPos,

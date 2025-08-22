@@ -6,12 +6,12 @@ func TestIsAttackingCell(t *testing.T) {
 	b := NewBoard() 
 	
 	//test 1: knight should attack c3
-	if !b.IsCellAttacked("c3",White) {
+	if !b.IsCellAttacked("c3",Black) {
 		t.Errorf("Expected c3 is attacked by knight on b1")
 	}
 
 	//test 2: nothing attacks e5
-	if b.IsCellAttacked("e5", White) {
+	if b.IsCellAttacked("e5", Black) {
 		t.Errorf("Expected nothing attacks e5")
 	}
 }

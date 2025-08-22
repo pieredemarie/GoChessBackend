@@ -106,3 +106,38 @@ func TestPawnMove(t *testing.T) {
         }
     }
 }
+
+func TestKingMove(t *testing.T) {
+    b := NewBoard()
+
+    // clearing the board
+    for i := 0; i < 8; i++ {
+        for j := 0; j < 8; j++ {
+            b.Squares[i][j] = nil
+        }
+    }
+
+    // white king on e1
+    b.Squares[0][4] = NewPiece(King, White)
+    king := *b.Squares[0][4]
+
+    // black rook on e8
+    b.Squares[7][4] = NewPiece(Rook, Black)
+
+    tests := []struct {
+        from, to string
+        want     bool
+    }{
+        {"e1", "e2", false}, // invalid move because you're still under check (AND HE SACRIFICE THE KING!!!)
+        {"e1", "h1", false}, // invalid move - unfortunately king can't jump like kangaroo 
+        {"e1", "d1", true},  // correct
+        {"e1", "f1", true},  // correct
+    }
+
+    for _, tt := range tests {
+        got := b.isLegalKingMove(king, Move{From: tt.from, To: tt.to})
+        if got != tt.want {
+            t.Errorf("king %s->%s got %v, want %v", tt.from, tt.to, got, tt.want)
+        }
+    }
+}

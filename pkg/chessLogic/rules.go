@@ -48,7 +48,40 @@ func (b *Board) isLegalKnightMove(piece Piece,m Move) bool {
 }
 
 func (b *Board) isLegalKingMove(piece Piece,m Move) bool {
-	return false // later i'll do it
+	fromFile, fromRank, err := squareToCoords(m.From)
+    if err != nil {
+        return false
+    }
+    toFile, toRank, err := squareToCoords(m.To)
+    if err != nil {
+        return false
+    }
+
+	king := b.Squares[fromRank][fromFile]
+
+	dRank := abs(toRank - fromRank)
+	dFile := abs(toFile - fromFile)
+
+	if dFile <= 1 && dRank <= 1 { 
+		if b.Squares[toRank][toFile] == nil || b.Squares[toRank][toFile].Color != piece.Color {
+			target := b.Squares[toRank][toFile]
+
+			//temporarily moving the figure on the square
+			b.Squares[fromRank][fromFile] = nil 
+			b.Squares[toRank][toFile] = king
+
+			//checking if king is under attack
+			kingPos := string(rune('a'+toFile)) + string(rune('1'+toRank))
+			isKingAttacked := b.IsCellAttacked(kingPos,king.Color)
+
+			//undo the move
+			b.Squares[fromRank][fromFile] = king
+			b.Squares[toRank][toFile] = target
+
+			return !isKingAttacked
+		}	
+	}
+	return false
 }
 
 func (b *Board) isLegalBishopMove(piece Piece,m Move) bool {
@@ -255,6 +288,11 @@ func sign(x int) int {
 
 func isValidCoordinate(file, rank int) bool {
     return file >= 0 && file < 8 && rank >= 0 && rank < 8
+}
+
+func OppositeColor(c Color) Color {
+	if c == White { return Black }
+	return White
 }
 
 func squareToCoords(sq string) (int, int, error) {

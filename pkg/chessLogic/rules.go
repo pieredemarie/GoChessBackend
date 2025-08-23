@@ -304,5 +304,5 @@ func squareToCoords(sq string) (int, int, error) {
     if file < 0 || file > 7 || rank < 0 || rank > 7 {
         return 0, 0, fmt.Errorf("invalid square: %s", sq)
     }
-    return file, rank, nil
+    return file, rank, nil // rank, file, nil
 }

@@ -1,38 +1,71 @@
 package chesslogic
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 //TODO
-// 
+//
 
 type Move struct {
 	From      string
 	To        string
-	Promotion *PieceType
+	Promotion string
 }
 
 func (b *Board) ApplyMove(m Move) error {
-	fromFile, fromRank, err := squareToCoords(m.From)
-	if err != nil {
-		return fmt.Errorf("invalid from square")
-	}
-	toFile, toRank, err := squareToCoords(m.To)
-	if err != nil {
-		return fmt.Errorf("invalid to square")
-	}
+    fromFile, fromRank, _ := squareToCoords(m.From)
+    toFile, toRank, _ := squareToCoords(m.To)
 
-	piece := b.Squares[fromRank][fromFile]
-	if piece == nil {
-		return fmt.Errorf("no piece at the selected square")
-	}
+    piece := b.Squares[fromRank][fromFile]
+    b.Squares[fromRank][fromFile] = nil
 
-	if !b.IsLegalMove(*piece,m) {
-		return fmt.Errorf("illegal move")
-	}
-	b.Squares[toRank][toFile] = nil
-	
+    // en passant
+    if piece.Type == Pawn && fromFile != toFile && b.Squares[toRank][toFile] == nil {
+        captureRank := fromRank
+        if piece.Color == White {
+            captureRank = toRank - 1
+        } else {
+            captureRank = toRank + 1
+        }
+        b.Squares[captureRank][toFile] = nil
+    }
+
+    // castle
+    if piece.Type == King && abs(toFile-fromFile) == 2 {
+        if toFile > fromFile { // short castling
+            rook := b.Squares[fromRank][7]
+            b.Squares[fromRank][7] = nil
+            b.Squares[fromRank][fromFile+1] = rook
+        } else { // long castling
+            rook := b.Squares[fromRank][0]
+            b.Squares[fromRank][0] = nil
+            b.Squares[fromRank][fromFile-1] = rook
+        }
+    }
+
+    // pawn promotion
+    if piece.Type == Pawn && (toRank == 7 || toRank == 0) {
+        pt, err := parsePromotion(m.Promotion)
+    	if err != nil {
+        	pt = Queen
+   	 	}
+    	piece.Type = pt
+    }
+
+    b.Squares[toRank][toFile] = piece
+
+    if piece.Type == Pawn && abs(toRank-fromRank) == 2 {
+        midRank := (toRank + fromRank) / 2
+        b.EnPassantSquare = string(rune('a'+fromFile)) + string(rune('1'+midRank))
+    } else {
+        b.EnPassantSquare = ""
+    }
 	return nil
 }
+
+
 
 func (b *Board) UndoMove(m Move) {
 	//TODO: restore previos move function
@@ -50,4 +83,16 @@ func (b *Board) GenerateAllPossibleMoves(piece Piece) {
 	// and yet. I'll keep trying. and keep feel sadness
 	// if anyone will ever read this - i wish you (no matter who you are or where you're from) lots of love and joy in your life
 	// and i will go play chess - because it's the only thing that brings me joy. Nothing else.
+}
+
+func parsePromotion(s string) (PieceType, error) {
+    switch strings.ToLower(s) {
+    case "q", "queen":  return Queen, nil
+    case "r", "rook":   return Rook, nil
+    case "b", "bishop": return Bishop, nil
+    case "n", "knight": return Knight, nil
+    case "":            return Queen, nil // по умолчанию ферзь
+    default:
+        return Queen, fmt.Errorf("unknown promotion: %q", s)
+    }
 }

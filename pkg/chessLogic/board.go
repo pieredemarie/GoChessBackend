@@ -3,11 +3,13 @@ package chesslogic
 type Board struct {
 	Squares [8][8]*Piece
 	Turn    Color
+	EnPassantSquare string
 }
 
 type CapablancaBoard struct { //In the future will be done this type of chess
 	Squares [10][8]*Piece
 	Turn    Color
+	EnPassantSquare string
 }
 
 func NewBoard() *Board {
@@ -25,8 +27,8 @@ func (b *Board) ArrangeFigures() {
 
 	//Rooks
 	b.Squares[0][0] = NewPiece(Rook, White)
-	b.Squares[0][7] = NewPiece(Rook, Black)
-	b.Squares[7][0] = NewPiece(Rook, White)
+	b.Squares[0][7] = NewPiece(Rook, White)
+	b.Squares[7][0] = NewPiece(Rook, Black)
 	b.Squares[7][7] = NewPiece(Rook, Black)
 
 	//Knights

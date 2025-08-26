@@ -35,7 +35,7 @@ func (p *PostgresStorage) Register(data User) error {
 		return err
 	}
 
-	_,err = p.db.Exec("INSERT into users (username, email, password_hash) VALUES ($1,$2,$3)", data.Username,data.Email,hashedPass)
+	_,err = p.db.Exec("INSERT into users (username, email, password_hash, rating) VALUES ($1,$2,$3,$4)", data.Username,data.Email,hashedPass,900) // 900 elo is default
 	return err
 }
 

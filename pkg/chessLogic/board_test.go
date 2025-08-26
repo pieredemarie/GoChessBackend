@@ -67,3 +67,67 @@ func TestStaleMate(t *testing.T) {
         t.Errorf("Expected stalemate for Black")
     }
 }
+
+func TestCastlingShort(t *testing.T) {
+    // creating new Board
+    b := NewBoard()
+    // putting white king and rook 
+    b.Squares[0][4] = &Piece{Type: King, Color: White}
+    b.Squares[0][7] = &Piece{Type: Rook, Color: White}
+    b.WhiteKingMoved = false
+    b.WhiteRookHMoved = false
+
+    // clearing the path
+    b.Squares[0][5] = nil
+    b.Squares[0][6] = nil
+
+    // castling kingside
+    move := Move{From: "e1", To: "g1"}
+    err := b.ApplyMove(move)
+    if err != nil {
+        t.Fatalf("castling failed: %v", err)
+    }
+
+    // making sure that castle is done
+    if b.Squares[0][6] == nil || b.Squares[0][6].Type != King {
+        t.Errorf("expected king on g1")
+    }
+    if b.Squares[0][5] == nil || b.Squares[0][5].Type != Rook {
+        t.Errorf("expected rook on f1")
+    }
+    if b.Squares[0][4] != nil || b.Squares[0][7] != nil {
+        t.Errorf("old squares should be empty")
+    }
+}
+
+func TestCastlingLo(t *testing.T) {
+b := NewBoard()
+    // putting white king and rook 
+    b.Squares[0][4] = &Piece{Type: King, Color: White}
+    b.Squares[0][0] = &Piece{Type: Rook, Color: White}
+    b.WhiteKingMoved = false
+    b.WhiteRookHMoved = false
+
+    // clearing the path
+    b.Squares[0][3] = nil
+    b.Squares[0][2] = nil
+	b.Squares[0][1] = nil
+
+    // castling queenside
+    move := Move{From: "e1", To: "c1"}
+    err := b.ApplyMove(move)
+    if err != nil {
+        t.Fatalf("castling failed: %v", err)
+    }
+
+    // making sure that castle is done
+    if b.Squares[0][2] == nil || b.Squares[0][2].Type != King {
+        t.Errorf("expected king on c1")
+    }
+    if b.Squares[0][3] == nil || b.Squares[0][3].Type != Rook {
+        t.Errorf("expected rook on d1")
+    }
+    if b.Squares[0][4] != nil || b.Squares[0][0] != nil {
+        t.Errorf("old squares should be empty")
+    }
+}

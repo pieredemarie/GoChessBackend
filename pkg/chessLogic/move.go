@@ -5,9 +5,6 @@ import (
 	"strings"
 )
 
-//TODO
-//
-
 type Move struct {
 	From      string
 	To        string
@@ -20,7 +17,7 @@ func (b *Board) ApplyMove(m Move) error {
 
     piece := b.Squares[fromRank][fromFile]
     b.Squares[fromRank][fromFile] = nil
-
+    //capPiece := b.Squares[toRank][toFile] <- this is for castle but never used
     // en passant
     if piece.Type == Pawn && fromFile != toFile && b.Squares[toRank][toFile] == nil {
         captureRank := fromRank
@@ -33,7 +30,7 @@ func (b *Board) ApplyMove(m Move) error {
     }
 
     // castle
-    if piece.Type == King && abs(toFile-fromFile) == 2 {
+    if piece.Type == King && abs(toFile-fromFile) == 2  { //TODO: in the future castle can be executed if player clicked on rook 
         if toFile > fromFile { // short castling
             rook := b.Squares[fromRank][7]
             b.Squares[fromRank][7] = nil
@@ -91,7 +88,7 @@ func parsePromotion(s string) (PieceType, error) {
     case "r", "rook":   return Rook, nil
     case "b", "bishop": return Bishop, nil
     case "n", "knight": return Knight, nil
-    case "":            return Queen, nil // по умолчанию ферзь
+    case "":            return Queen, nil 
     default:
         return Queen, fmt.Errorf("unknown promotion: %q", s)
     }

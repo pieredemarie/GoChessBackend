@@ -4,6 +4,13 @@ type Board struct {
 	Squares [8][8]*Piece
 	Turn    Color
 	EnPassantSquare string
+
+	WhiteKingMoved bool 
+	WhiteRookAMoved bool // queen side
+	WhiteRookHMoved bool // king side
+	BlackKingMoved bool 
+	BlackRookAMoved bool 
+	BlackRookHMoved bool 
 }
 
 type CapablancaBoard struct { //In the future will be done this type of chess
@@ -50,6 +57,13 @@ func (b *Board) ArrangeFigures() {
 	// Kings
 	b.Squares[0][4] = NewPiece(King, White)
 	b.Squares[7][4] = NewPiece(King, Black)
+
+	b.BlackKingMoved = false
+	b.WhiteKingMoved = false 
+	b.BlackRookAMoved = false
+	b.WhiteRookAMoved = false 
+	b.BlackRookHMoved = false 
+	b.WhiteRookAMoved = false 
 }
 
 func (b *Board) GetPiece(pos string) *Piece {
@@ -212,4 +226,65 @@ func (b *Board) IsStaleMate(currentColor Color) bool {
 		}
 	}
 	return true
+}
+
+func (b *Board) CanCastle(color Color,side string) bool {
+	if color == White {
+		if b.WhiteKingMoved {
+			return false
+		}
+		if side == "kingside" && b.WhiteRookHMoved {
+			return false
+		}
+		if side == "queenside" && b.WhiteRookAMoved {
+			return false
+		}
+
+		//path must be clear
+		if side == "kingside" {
+			if b.Squares[0][5] != nil || b.Squares[0][6] != nil {
+				return false
+			}
+			if b.IsCheck(White) || b.IsCellAttacked("f1", Black) || b.IsCellAttacked("g1", Black) {
+				return false
+			}
+		} else {
+			if b.Squares[0][1] != nil || b.Squares[0][2] != nil || b.Squares[0][3] != nil {
+				return false
+			}
+			if b.IsCheck(White) || b.IsCellAttacked("b1", Black) || b.IsCellAttacked("c1", Black) || b.IsCellAttacked("d1", Black) {
+				return false
+			}
+		}
+		return true
+	} else if color == Black {
+		if b.BlackKingMoved {
+			return false
+		}
+		if side == "kingside" && b.BlackRookHMoved {
+			return false
+		}
+		if side == "queenside" && b.BlackRookAMoved {
+			return false
+		}
+
+		//path must be clear
+		if side == "kingside" {
+			if b.Squares[7][5] != nil || b.Squares[7][6] != nil {
+				return false
+			}
+			if b.IsCheck(White) || b.IsCellAttacked("f8", Black) || b.IsCellAttacked("g8", Black) {
+				return false
+			}
+		} else {
+			if b.Squares[0][1] != nil || b.Squares[7][2] != nil || b.Squares[7][3] != nil {
+				return false
+			}
+			if b.IsCheck(White) || b.IsCellAttacked("b8", Black) || b.IsCellAttacked("c8", Black) || b.IsCellAttacked("d8", Black) {
+				return false
+			}
+		}
+		return true
+	}
+	return false
 }

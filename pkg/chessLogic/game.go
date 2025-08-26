@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type GameStatus int
@@ -105,12 +107,11 @@ func (g *Game) MakeMove(move Move) error {
 }
 
 func (g *Game) IsGameOver() bool {
-	//TODO: checking the game status (mate, check, stalemate)
-	return false
+	return g.Status == Finished
 }
 
 func generateGameId() string {
-	//some hard calculations here...
-	return "dummy_ID"
+	id := uuid.New()
+	return id.String()
 }
 

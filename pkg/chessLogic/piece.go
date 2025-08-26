@@ -36,7 +36,7 @@ func (p *Piece) IsBlack() bool {
 	return p != nil && p.Color == Black
 }
 
-func squareToIndex(square string) (row,col int,ok bool) {
+func squareToIndex(square string) (row,col int,ok bool) { 
 	if len(square) != 2 {
 		return 0,0, false
 	}

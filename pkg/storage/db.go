@@ -1,6 +1,7 @@
 package storage
 
 import (
+	chesslogic "backendChess/pkg/chessLogic"
 	"backendChess/pkg/jwtutils"
 	"database/sql"
 	"errors"
@@ -72,4 +73,17 @@ func (p *PostgresStorage) GetUserInfo(userId int) (*UserInfo, error) {
 		return nil, err
 	}
 	return &info, nil
+}
+
+//TODO: DO IT. I wanna play chess so hard so i'll do it tonight (i guess not)
+func (p *PostgresStorage) SaveGame(game *chesslogic.Game) error {
+	return nil // will be done a little bit later 
+} 
+
+func (p *PostgresStorage) SaveMove(gameID string, move chesslogic.Move) error {
+	return nil
+}
+
+func (p *PostgresStorage) UpdateGameResult(gameID string, winner string, reason string) error {
+	return nil
 }

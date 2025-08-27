@@ -56,7 +56,7 @@ func (m *Matchmaker) Enqueue(c *Client) {
 	m.mu.Lock()
 	m.queue = append(m.queue, c)
 	m.mu.Unlock()
-	//go m.tryMatch
+	go m.tryMatch()
 }
 
 func (m *Matchmaker) RemoveFromQueue(c *Client) {

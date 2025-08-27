@@ -4,9 +4,6 @@ import (
 	"fmt"
 )
 
-//TODO
-//in game.go Check and hasAttackedCell functions!!
-
 func (b *Board) IsLegalMove(piece Piece,m Move) bool {
 	switch piece.Type {
 	case Pawn:

@@ -1,6 +1,9 @@
 package storage
 
-import chesslogic "backendChess/pkg/chessLogic"
+import (
+	chesslogic "backendChess/pkg/chessLogic"
+	"time"
+)
 
 type User struct {
 	ID       int    `json:"id"`
@@ -21,6 +24,26 @@ type Login struct {
 	Password string `json:"password"`
 }
 
+type DBGame struct {
+	ID string 
+	WhiteID int 
+	BlackID int 
+	Status string // "active/finished"
+	CreatedAt time.Time 
+	FinishedAt *time.Time
+	Result string
+}
+
+type DBMove struct {
+	ID string 
+	GameID string 
+	MoveNum int 
+	From string 
+	To string 
+	Piece string 
+	CreatedAt time.Time
+}
+
 type AuthStorage interface {
 	Login(email, password string) (string, error)
 	Register(data User) error
@@ -28,7 +51,7 @@ type AuthStorage interface {
 }
 
 type GameStorage interface {
-	SaveGame(game *chesslogic.Game) error 
+	SaveGame(g *DBGame) error 
 	SaveMode(gameID string,move chesslogic.Move) error 
 	UpdateGameResult(gameID string, winner string, reason string) error
 }

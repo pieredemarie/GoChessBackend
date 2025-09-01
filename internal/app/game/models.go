@@ -3,7 +3,9 @@ package game
 import (
 	chesslogic "backendChess/pkg/chessLogic"
 	"encoding/json"
+	"sync"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
@@ -59,6 +61,29 @@ type UpdateData struct {
 type GameOverData struct {
 	Reason string `json:"reason"`          // resign/checkmate/stalemate/disconnect
 	Winner string `json:"winner,omitempty"` // "white"/"black"/"draw"
+}
+
+type UpdateGameRequest struct {
+	GameID string `json:"gameId"`
+	Winner string `json:"winner"`
+	Reason string `json:"reason"`
+}
+
+type Client struct {
+	ID     string
+	UserID int
+	Conn   *websocket.Conn
+	Send   chan []byte
+	Rating int
+	Color  chesslogic.Color
+
+	room   *Room
+	mu     sync.Mutex 
+}
+
+type Claims struct {
+	UserID   int    `json:"user_id"`
+    jwt.StandardClaims
 }
 
 func mustRaw(v any) json.RawMessage {

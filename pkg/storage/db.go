@@ -1,7 +1,6 @@
 package storage
 
 import (
-	chesslogic "backendChess/pkg/chessLogic"
 	"backendChess/pkg/jwtutils"
 	"database/sql"
 	"errors"
@@ -75,15 +74,29 @@ func (p *PostgresStorage) GetUserInfo(userId int) (*UserInfo, error) {
 	return &info, nil
 }
 
-//TODO: DO IT. I wanna play chess so hard so i'll do it tonight (i guess not)
-func (p *PostgresStorage) SaveGame(game *chesslogic.Game) error {
-	return nil // will be done a little bit later 
+func (p *PostgresStorage) SaveGame(g *DBGame) error {
+	_, err := p.db.Exec(`
+	Insert into games (id, white_id,black_id, status,created_at,finished_at, result) 
+	VALUES ($1,$2,$3,$4,$5,$6,$7)
+	`,g.ID,g.WhiteID,g.BlackID,g.Status,g.CreatedAt,g.CreatedAt,g.Result)
+	return err
 } 
 
-func (p *PostgresStorage) SaveMove(gameID string, move chesslogic.Move) error {
-	return nil
+func (p *PostgresStorage) SaveMove(m *DBMove) error {
+	_, err := p.db.Exec(`
+		INSERT into moves (id,game_id,move_number,from_square,to_square,piece,created_at) 
+		VALUES ($1,$2,$3,$4,$5,$6,$7)
+	`,m.ID,m.GameID,m.MoveNum,m.From,m.To,m.Piece,m.CreatedAt)
+	return err
 }
 
 func (p *PostgresStorage) UpdateGameResult(gameID string, winner string, reason string) error {
-	return nil
+	_, err := p.db.Exec(`
+		UPDATE games
+		SET status = $1
+		result = $2
+		WHERE id = $3
+	`, winner,reason, gameID)
+	return err
 }
+

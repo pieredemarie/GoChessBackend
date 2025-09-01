@@ -1,31 +1,22 @@
 package game
 
 import (
-	chesslogic "backendChess/pkg/chessLogic"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
-	"sync"
+	"os"
+	"strings"
 	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/websocket"
 )
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {return true},
-}
-
-type Client struct {
-	ID     string
-	Conn   *websocket.Conn
-	Send   chan []byte
-	Rating int
-	Color  chesslogic.Color
-
-	room   *Room
-	mu     sync.Mutex 
 }
 
 func (c *Client) writeJSON(v any) {
@@ -136,7 +127,38 @@ func (c *Client) readPump(ctx context.Context) {
 	}
 }
 
+var jwtKey = os.Getenv("JWT_SECRET")
+
+func getUserIDFromToken(r *http.Request) (int, error) {
+    authHeader := r.Header.Get("Authorization")
+    if authHeader == "" {
+        return 0, fmt.Errorf("no authorization header")
+    }
+
+    parts := strings.Split(authHeader, " ")
+    if len(parts) != 2 || parts[0] != "Bearer" {
+        return 0, fmt.Errorf("invalid auth header format")
+    }
+    tokenStr := parts[1]
+
+    claims := &Claims{}
+    token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+        return jwtKey, nil
+    })
+    if err != nil || !token.Valid {
+        return 0, fmt.Errorf("invalid token")
+    }
+
+    return claims.UserID, nil
+}
+
 func WSHandler(w http.ResponseWriter,r *http.Request) {
+	userID, err := getUserIDFromToken(r)
+    if err != nil {
+        http.Error(w, "unauthorized: "+err.Error(), http.StatusUnauthorized)
+        return
+    }
+
 	conn, err := upgrader.Upgrade(w,r,nil)
 	if err != nil {
 		http.Error(w,"upgrade failed", http.StatusBadRequest)
@@ -144,6 +166,7 @@ func WSHandler(w http.ResponseWriter,r *http.Request) {
 	}
 	c := &Client{
 		ID: randRoomID(),
+		UserID: userID,
 		Conn: conn,
 		Send: make(chan []byte,64),
 	}

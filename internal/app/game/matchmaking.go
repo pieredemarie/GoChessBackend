@@ -2,10 +2,12 @@ package game
 
 import (
 	chesslogic "backendChess/pkg/chessLogic"
+	"backendChess/pkg/storage"
 	"context"
 	"math/rand"
 	"strings"
 	"sync"
+	"time"
 )
 
 type Room struct {
@@ -22,6 +24,7 @@ type Room struct {
 type Matchmaker struct {
 	mu sync.Mutex 
 	queue []*Client
+	store storage.GameStorage
 }
 
 var rooms sync.Map
@@ -50,7 +53,11 @@ func NewRoom(a,b *Client) *Room {
 	return r
 }
 
-var matchmaker = &Matchmaker{}
+var matchmaker *Matchmaker
+
+func InitMatchmaker(store storage.GameStorage) {
+	matchmaker = &Matchmaker{store: store}
+}
 
 func (m *Matchmaker) Enqueue(c *Client) {
 	m.mu.Lock()
@@ -116,12 +123,23 @@ func (m *Matchmaker) tryMatch() {
 	m.queue = newQueue
 
 	for _, pr := range pairs { //Creating game for all who love chess (you must love it too)
-		CreateRoom(pr[0],pr[1])
+		m.CreateRoom(pr[0],pr[1])
 	}
 }
 
-func CreateRoom(a,b *Client) {
+func (m *Matchmaker) CreateRoom(a,b *Client) {
 	r := NewRoom(a,b)
+
+	dbGame := &storage.DBGame{
+		ID: r.ID,
+		WhiteID: a.UserID,
+		BlackID: b.UserID,
+		Status: "active",
+		CreatedAt: time.Now(),
+	}
+	if err := m.store.SaveGame(dbGame); err != nil {
+
+	}
 
 	a.writeJSON(Envelope{Type:MsgMatch,Data: mustRaw(MatchData{RoomID: r.ID, Color: a.Color})})
 	b.writeJSON(Envelope{Type:MsgMatch,Data: mustRaw(MatchData{RoomID: r.ID, Color: b.Color})})

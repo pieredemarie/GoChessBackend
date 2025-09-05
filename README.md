@@ -48,4 +48,4 @@ GET /game/:id - get game state
 GET /game/ws - Websocket for moves and updates 
 
 TODO: 
-FEN/PGN exports
+PGN export
